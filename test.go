@@ -3,7 +3,7 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	// "net/http"
 	"io/ioutil"
 	"golang.org/x/net/context"
 	speech "cloud.google.com/go/speech/apiv1"
@@ -38,28 +38,28 @@ func main() {
 	//ERROR HANDLING FOR CONNECTING TO AUDIO FILE
 	audioData, err := ioutil.ReadFile(filename);
 	if(err != nil) {
-	fmt.Println(err)
+		log.Fatalf("Failed to read file: %v", err)
 	}
 
 	response, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
-	Config: &speechpb.RecognitionConfig{
-	Encoding: speechpb.RecognitionConfig_LINEAR16,
-	SampleRateHertz: 22050,
-	LanguageCode: "en-US",
-	},
-	Audio: &speechpb.RecognitionAudio{
-	AudioSource: &speechpb.RecognitionAudio_Content{Content: audioData},
-	},
+		Config: &speechpb.RecognitionConfig{
+			Encoding: speechpb.RecognitionConfig_LINEAR16,
+			SampleRateHertz: 16000,
+			LanguageCode: "en-US",
+		},
+		Audio: &speechpb.RecognitionAudio{
+			AudioSource: &speechpb.RecognitionAudio_Content{Content: audioData},
+		},
 	})
 
 	if (err != nil) {
-		fmt.Println(err)
+		log.Fatalf("Failed to recognize: %v", err)
 	}
-
+	//PRINTS THE RESULT
 	for _, result := range response.Results{
-	for _, alt := range result.Alternatives{
-	fmt.Println(alt.Transcript)
-	
-	}
+		for _, alt := range result.Alternatives{
+			// fmt.Println(alt.Transcript)
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+		}
 	}
 }
