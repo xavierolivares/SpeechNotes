@@ -29,13 +29,14 @@ func main() {
 
 	client, err := speech.NewClient(ctx)
 	if(err != nil) {
-	fmt.Println(err)
+		log.Fatalf("Failed to create client: %v", err)
 	}
 
-	//ERROR HANDLING FOR CONNECTING TO AUDIO FILE
-	filDir := "Recording.wav";
+	//PATH TO AUDIO FILE .raw file
+	filename := "/Users/xavierolivares/go/src/projects/speechtest/audio.raw";
 
-	audioData, err := ioutil.ReadFile(fileDir);
+	//ERROR HANDLING FOR CONNECTING TO AUDIO FILE
+	audioData, err := ioutil.ReadFile(filename);
 	if(err != nil) {
 	fmt.Println(err)
 	}

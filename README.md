@@ -16,3 +16,5 @@ Still unclear:
 Is my secret configuration working?
 How to get an audio file?
 How to import that file into application?
+
+Get the Client Library Tutorial: https://github.com/Drizzy3D/go-speech-recognition-lib
