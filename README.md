@@ -48,3 +48,21 @@ Installation for GO: https://cloud.google.com/appengine/docs/standard/go/downloa
 
 Steps: Needed to gcloud init and authorize Google Cloud SDK
 Confirmation page: https://cloud.google.com/sdk/auth_success
+
+GOAL: test gcloud and code locally
+
+TEST 1: ERROR
+PASSED IN - /Users/xavierolivares/go/src/projects/speechtest/audio.raw
+RESULT - 2019/06/21 15:40:22 Please pass path to y
+our local audio file as a command line ar
+gument
+
+
+TEST 2: SUCCESS
+PASSED IN - go build && ./speechtest /Users/xav
+ierolivares/go/src/projects/speechtest/au
+dio.raw
+RESULT - Result: alternatives:<transcript:"how old
+ is the Brooklyn Bridge" confidence:0.983
+5046 > is_final:true result_end_time:<sec
+onds:1 nanos:770000000 > 
