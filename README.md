@@ -22,3 +22,10 @@ Get the Client Library Tutorial: https://github.com/Drizzy3D/go-speech-recogniti
 TESTING RESULT 1:
 -2019/06/21 12:54:47 Failed to recognize: rpc error: code = PermissionDenied desc = Cloud Speech-to-Text API has not been used in project "soandso" before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/speech.googleapis.com/overview?project="soandso" then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.
 -Enabled API, needed to set up billing account. Free 12months or $300 credit!
+
+TESTING RESULT 2: 
+-Passed! "how old is the Brooklyn Bridge (confidence=0.983505)"
+
+Next step is to figure out to make these changes in realtime..I'm thinking that I need to add to the audio file based on speech. It may get delayed as the audiofile changes. Perhaps I can parse a new audiofile every 10 seconds? Not sure if concurrency will help.
+
+
