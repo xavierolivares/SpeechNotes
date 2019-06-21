@@ -1,65 +1,103 @@
 package main
 
 import _ "github.com/joho/godotenv/autoload"
+
 import (
+	"context"
+	"flag"
 	"fmt"
-	// "net/http"
-	"io/ioutil"
-	"golang.org/x/net/context"
+	"io"
+	"log"
+	"os"
+	"path/filepath"
+
 	speech "cloud.google.com/go/speech/apiv1"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
-	// "github.com/joho/godotenv" 
-	"log" 
-	// "os"
 )
 
-
 func main() {
-	fmt.Println("Hello ODSC and ME!")
+	flag.Usage = func() {
+			fmt.Fprintf(os.Stderr, "Usage: %s <AUDIOFILE>\n", filepath.Base(os.Args[0]))
+			fmt.Fprintf(os.Stderr, "<AUDIOFILE> must be a path to a local audio file. Audio file must be a 16-bit signed little-endian encoded with a sample rate of 16000.\n")
 
-	//ERROR HANDLING FOR GOOGLE_APPLICATION_CREDENTIALS
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-	// googleKey := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	}
+	flag.Parse()
+	if len(flag.Args()) != 1 {
+			log.Fatal("Please pass path to your local audio file as a command line argument")
+	}
+	audioFile := flag.Arg(0)
 
-	//ERROR HANDLING IF API HAS NOT COMPLETED A REQUEST
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
-	if(err != nil) {
-		log.Fatalf("Failed to create client: %v", err)
+	if err != nil {
+			log.Fatal(err)
+	}
+	stream, err := client.StreamingRecognize(ctx)
+	if err != nil {
+			log.Fatal(err)
+	}
+	// Send the initial configuration message.
+	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+			StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
+					StreamingConfig: &speechpb.StreamingRecognitionConfig{
+							Config: &speechpb.RecognitionConfig{
+									Encoding:        speechpb.RecognitionConfig_LINEAR16,
+									SampleRateHertz: 16000,
+									LanguageCode:    "en-US",
+							},
+					},
+			},
+	}); err != nil {
+			log.Fatal(err)
 	}
 
-	//PATH TO AUDIO FILE .raw file
-	filename := "/Users/xavierolivares/go/src/projects/speechtest/audio.raw";
-
-	//ERROR HANDLING FOR CONNECTING TO AUDIO FILE
-	audioData, err := ioutil.ReadFile(filename);
-	if(err != nil) {
-		log.Fatalf("Failed to read file: %v", err)
+	f, err := os.Open(audioFile)
+	if err != nil {
+			log.Fatal(err)
 	}
+	defer f.Close()
 
-	response, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
-		Config: &speechpb.RecognitionConfig{
-			Encoding: speechpb.RecognitionConfig_LINEAR16,
-			SampleRateHertz: 16000,
-			LanguageCode: "en-US",
-		},
-		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Content{Content: audioData},
-		},
-	})
+	go func() {
+			buf := make([]byte, 1024)
+			for {
+					n, err := f.Read(buf)
+					if n > 0 {
+							if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+									StreamingRequest: &speechpb.StreamingRecognizeRequest_AudioContent{
+											AudioContent: buf[:n],
+									},
+							}); err != nil {
+									log.Printf("Could not send audio: %v", err)
+							}
+					}
+					if err == io.EOF {
+							// Nothing else to pipe, close the stream.
+							if err := stream.CloseSend(); err != nil {
+									log.Fatalf("Could not close stream: %v", err)
+							}
+							return
+					}
+					if err != nil {
+							log.Printf("Could not read from %s: %v", audioFile, err)
+							continue
+					}
+			}
+	}()
 
-	if (err != nil) {
-		log.Fatalf("Failed to recognize: %v", err)
-	}
-	//PRINTS THE RESULT
-	for _, result := range response.Results{
-		for _, alt := range result.Alternatives{
-			// fmt.Println(alt.Transcript)
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
+	for {
+			resp, err := stream.Recv()
+			if err == io.EOF {
+					break
+			}
+			if err != nil {
+					log.Fatalf("Cannot stream results: %v", err)
+			}
+			if err := resp.Error; err != nil {
+					log.Fatalf("Could not recognize: %v", err)
+			}
+			for _, result := range resp.Results {
+					fmt.Printf("Result: %+v\n", result)
+			}
 	}
 }

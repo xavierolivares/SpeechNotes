@@ -26,6 +26,25 @@ TESTING RESULT 1:
 TESTING RESULT 2: 
 -Passed! "how old is the Brooklyn Bridge (confidence=0.983505)"
 
+NEW GOAL:
 Next step is to figure out to make these changes in realtime..I'm thinking that I need to add to the audio file based on speech. It may get delayed as the audiofile changes. Perhaps I can parse a new audiofile every 10 seconds? Not sure if concurrency will help.
 
+Resources: https://cloud.google.com/speech-to-text/docs/streaming-recognize
 
+gcloud tool: https://cloud.google.com/speech-to-text/docs/quickstart
+
+
+TESTING RESULT 1: 
+2019/06/21 13:39:53 Warning: Speech recognition request exceeded limit of 60 seconds.
+2019/06/21 13:39:53 Could not recognize: code:11 message:"Audio Timeout Error: Long duration elapsed without audio. Audio should be sent close to real time." 
+-I don't think the program is recognizing the audio from my mic.
+
+
+Google Cloud SDK Documentation: 
+https://cloud.google.com/sdk/docs/
+https://cloud.google.com/speech-to-text/docs/quickstart-gcloud
+
+Installation for GO: https://cloud.google.com/appengine/docs/standard/go/download
+
+Steps: Needed to gcloud init and authorize Google Cloud SDK
+Confirmation page: https://cloud.google.com/sdk/auth_success
