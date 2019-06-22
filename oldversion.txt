@@ -253,3 +253,6 @@ func main() {
 		}
 	}
 }
+
+GOOGLE_APPLICATION_CREDENTIALS="/Users/xavierolivares/downloads/cedar-setup-244422-3c832adba860.json"
+API_KEY=AIzaSyBuE0awH43ft5ncbpm4SZ2f3gsRlnKbvGM
