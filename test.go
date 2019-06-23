@@ -3,67 +3,91 @@ package main
 import _ "github.com/joho/godotenv/autoload"
 
 import (
+	"context"
 	"fmt"
-	// "net/http"
-	"io/ioutil"
+	"io"
+	"log"
+	"os"
 
 	speech "cloud.google.com/go/speech/apiv1"
-	"golang.org/x/net/context"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
-
-	// "github.com/joho/godotenv"
-	"log"
-	// "os"
 )
 
 func main() {
-	fmt.Println("Hello Fullstack Fam!")
-
-	//ERROR HANDLING FOR GOOGLE_APPLICATION_CREDENTIALS
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-	// googleKey := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-
-	//ERROR HANDLING IF API HAS NOT COMPLETED A REQUEST
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		log.Fatal(err)
 	}
-
-	//PATH TO AUDIO FILE .raw file
-	filename := "/Users/xavierolivares/go/src/projects/speechtest/audio.raw"
-
-	//ERROR HANDLING FOR CONNECTING TO AUDIO FILE
-	audioData, err := ioutil.ReadFile(filename)
+	stream, err := client.StreamingRecognize(ctx)
 	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
+		log.Fatal(err)
+	}
+	// Send the initial configuration message.
+	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
+			StreamingConfig: &speechpb.StreamingRecognitionConfig{
+				Config: &speechpb.RecognitionConfig{
+					Encoding:        speechpb.RecognitionConfig_LINEAR16,
+					SampleRateHertz: 16000,
+					LanguageCode:    "en-US",
+				},
+			},
+		},
+	}); err != nil {
+		log.Fatal(err)
 	}
 
-	response, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
-		Config: &speechpb.RecognitionConfig{
-			Encoding:        speechpb.RecognitionConfig_LINEAR16,
-			// SampleRateHertz: 8000,
-			// SampleRateHertz: 11025,
-			SampleRateHertz: 16000,
-			LanguageCode:    "en-US",
-		},
-		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Content{Content: audioData},
-		},
-	})
+	go func() {
+		// Pipe stdin to the API.
+		buf := make([]byte, 1024)
+		// log.Printf("Does buf exist?", buf)
+		for {
+			n, err := os.Stdin.Read(buf)
+			if n > 0 {
+				if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+					StreamingRequest: &speechpb.StreamingRecognizeRequest_AudioContent{
+						AudioContent: buf[:n],
+					},
+				}); err != nil {
+					log.Printf("Could not send audio: %v", err)
+				}
+			}
+			if err == io.EOF {
+				// Nothing else to pipe, close the stream.
+				if err := stream.CloseSend(); err != nil {
+					log.Fatalf("Could not close stream: %v", err)
+				}
+				return
+			}
+			if err != nil {
+				log.Printf("Could not read from stdin: %v", err)
+				continue
+			}
+		}
+	}()
+	//IFFE ^?
 
-	if err != nil {
-		log.Fatalf("Failed to recognize: %v", err)
-	}
-	//PRINTS THE RESULT
-	for _, result := range response.Results {
-		for _, alt := range result.Alternatives {
-			// fmt.Println(alt.Transcript)
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Cannot stream results: %v", err)
+		}
+		if err := resp.Error; err != nil {
+			// Workaround while the API doesn't give a more informative error.
+			if err.Code == 3 || err.Code == 11 {
+				log.Print("WARNING: Speech recognition request exceeded limit of 60 seconds.")
+			}
+			log.Fatalf("Could not recognize: %v", err)
+		}
+		for _, result := range resp.Results {
+			fmt.Printf("Result: %+v\n", result)
 		}
 	}
 }
+
+brew install clutter-gst gst-editing-services gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly gst-python gst-rtsp-server gst-validate gstreamer gstreamermm logstalgia logstash

@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello ODSC and ME!")
+	fmt.Println("Hello Fullstack Fam!")
 
 	//ERROR HANDLING FOR GOOGLE_APPLICATION_CREDENTIALS
 	// err := godotenv.Load()
@@ -44,6 +44,8 @@ func main() {
 	response, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
 			Encoding:        speechpb.RecognitionConfig_LINEAR16,
+			// SampleRateHertz: 8000,
+			// SampleRateHertz: 11025,
 			SampleRateHertz: 16000,
 			LanguageCode:    "en-US",
 		},

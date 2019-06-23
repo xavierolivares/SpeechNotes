@@ -66,3 +66,9 @@ RESULT - Result: alternatives:<transcript:"how old
  is the Brooklyn Bridge" confidence:0.983
 5046 > is_final:true result_end_time:<sec
 onds:1 nanos:770000000 > 
+
+FINDING MIC CODES: gst-device-monitor-1.0
+
+REQUIRED: Need to insert mic input into command line with gst-launch1.0.
+
+FOUND this: gst-launch-1.0 osxaudiosrc device=40
