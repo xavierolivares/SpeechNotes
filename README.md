@@ -72,3 +72,10 @@ FINDING MIC CODES: gst-device-monitor-1.0
 REQUIRED: Need to insert mic input into command line with gst-launch1.0.
 
 FOUND this: gst-launch-1.0 osxaudiosrc device=40
+
+Questions:
+thirdlevel branch: how can i get the microphone to link up with this code?
+
+stretch:
+Is it possible to get results to render on html page?
+
