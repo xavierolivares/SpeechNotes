@@ -79,3 +79,8 @@ thirdlevel branch: how can i get the microphone to link up with this code?
 stretch:
 Is it possible to get results to render on html page?
 
+TAKEAWAYS: how to run audio file locally with cat and livecaption
+cat ./audio.raw | go run liv
+ecaption.go
+
+gst-launch-1.0 -v osxaudiosrc device=40 ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | go run livecaption.go
