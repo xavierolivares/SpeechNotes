@@ -89,5 +89,3 @@ func main() {
 		}
 	}
 }
-
-brew install clutter-gst gst-editing-services gst-libav gst-plugins-bad gst-plugins-base gst-plugins-good gst-plugins-ugly gst-python gst-rtsp-server gst-validate gstreamer gstreamermm logstalgia logstash
