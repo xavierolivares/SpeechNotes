@@ -83,4 +83,13 @@ TAKEAWAYS: how to run audio file locally with cat and livecaption
 cat ./audio.raw | go run liv
 ecaption.go
 
+//Configure gcloud credentials for communicating with SpeechToText API
+
+export GOOGLE_APPLICATION_CREDENTIALS=[PATH TO CREDENTIALS JSON]
+
 gst-launch-1.0 -v osxaudiosrc device=40 ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | go run livecaption.go
+
+gst-launch-1.0 -v osxaudiosrc device=40 ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | go run *.go
+
+Running local file:
+cat ./audio.raw | go run *.go

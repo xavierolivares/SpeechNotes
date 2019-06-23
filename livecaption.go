@@ -32,7 +32,8 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
-func main() {
+// func main() {
+func liveCaption() {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
