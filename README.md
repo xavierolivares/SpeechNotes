@@ -93,3 +93,5 @@ gst-launch-1.0 -v osxaudiosrc device=40 ! audioconvert ! audioresample ! audio/x
 
 Running local file:
 cat ./audio.raw | go run *.go
+
+Doesn't work with bluetooth, at least yet.
